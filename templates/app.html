@@ -1,0 +1,223 @@
+{% extends "masterPage.html" %}
+{% block head%}
+<style>
+    .close-button {
+      border: none;
+      display: inline-block;
+      padding: 8px 16px;
+      vertical-align: middle;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      background-color: inherit;
+      text-align: center;
+      cursor: pointer;
+      white-space: nowrap
+    }
+
+    .topright {
+      position: absolute;
+      right: 0;
+      top: 0
+    }
+</style>
+{% endblock %}
+{% block javascript %}
+<script>
+    function downloadURI(data)
+    {
+        if (data['status'] === "True"){
+            console.log(data)
+            var uri = data['uri']
+            var name = data['name']
+            console.log(uri)
+            console.log(name)
+            var link = document.createElement("a");
+            link.classList.add("btn")
+            link.innerText = "Download"
+            link.id = "download-button"
+            // If you don't know the name or want to use
+            // the webserver default set name = ''
+            link.href = name+"/download";
+            $("#download").append(link);
+            $("#download-modal").show()
+        }
+        else{
+            alert("There was an error while creating the Audit Report.")
+            location.reload(true);
+        }
+    }
+
+    $("#download").on('click', function(){
+
+    })
+
+    $("#exit-modal").on('click', function(){
+        $("#download-button").remove()
+    })
+
+    $("#submit").click(function(){
+        var selected_users = []
+        $(".table_checkbox").each(function(){
+            if($(this).is(":checked")){
+                selected_users.push($(this).attr('id'))
+            }
+        });
+        $("#modal-submit").show()
+        $.post("/app", JSON.stringify({users : selected_users}),
+        function(data,status){
+             downloadURI(data)
+
+        }).done(function( data ) {
+            $("#modal-submit").hide()
+
+        });
+    });
+
+    $("#search").keyup(function() {
+        var value = this.value;
+        $("table tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value.toLowerCase()) > -1)
+        });
+    });
+
+    $("#internal_users").on("change", function(e) {
+      if ($(this).is(":checked")){
+        console.log("toggle: Show");
+        $(".internal").show()
+      }
+      else{
+        console.log("toggle: Hide");
+        $(".internal").hide()
+      }
+    });
+
+    $("#external_users").on("change", function(e) {
+      if ($(this).is(":checked")){
+        console.log("toggle: Show");
+        $(".external").show()
+      }
+      else{
+        console.log("toggle: Hide");
+        $(".external").hide()
+      }
+    });
+
+</script>
+{% endblock %}
+{% block content %}
+    <div class="section" style="display:flex;justify-content:center;align-items:center;text-align:center;min-height:50vh;">
+        <div class="section" style="position: fixed;z-index:2000;">
+                <div class="modal modal--small" style="display: none;" id="modal-submit">
+                    <div class="modal__dialog">
+                        <div class="modal__content">
+                            <div class="modal__body">
+                               <div id="loading-submit" class="col-md-12">
+                                <div class="subheader text-center">Creating Audit. This could take a while...</div>
+                                <div class="loading-dots loading-dots--info" aria-label="Loading, please wait...">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <div class="section" style="position: fixed;z-index:2000;">
+                <div class="modal modal--small" style="display: none;" id="download-modal">
+                    <div class="modal__dialog">
+                        <div class="modal__content">
+                            <header style="background-color:#FF0000;color:#fff; font-size:16;">
+                              <span id="exit-modal" onclick="document.getElementById('download-modal').style.display='none'" class="close-button topright">&times;</span>
+                            </header>
+                            <div class="subheader text-center">Please download the Audit report below.</div>
+                            <div class="modal__body" id="download" style="justify-content: center;align-items: center; display:flex;">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+        <div class="panel panel--loose panel--raised base-margin-bottom" style="width:50%; position:fixed; margin-top:13%; margin-right:6%;">
+            <h3> Users </h3>
+            <div class="responsive-table">
+                <table class="table table--lined table--selectable table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <label class="checkbox">
+                                    <input type="checkbox">
+                                    <span class="checkbox__input"></span>
+                                </label>
+                            </th>
+                            <th style="text-align: center;">First Name</th>
+                            <th style="text-align: center;">Last Name</th>
+                            <th style="text-align: center;">User Emails</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in internal_users%}
+                                <tr class="internal">
+
+                                    <td>
+                                        <label class="checkbox">
+                                            <input class="table_checkbox" type="checkbox" id="{{ user.id }}" >
+                                            <span class="checkbox__input"></span>
+                                        </label>
+                                    </td>
+                                    <td>{{ user.firstName }}</td>
+                                    <td>{{ user.lastName }}</td>
+
+
+                                    <td>{{ user.email }}</td>
+                                </tr>
+                        {% endfor %}
+
+                        {% for user in external_users%}
+                                <tr class="external">
+                                    <td>
+                                        <label class="checkbox">
+                                            <input class="table_checkbox" type="checkbox" id="{{ user.id }}">
+                                            <span class="checkbox__input"></span>
+                                        </label>
+                                    </td>
+                                    <td>{{ user.firstName }}</td>
+                                    <td>{{ user.lastName }}</td>
+
+                                    <td>{{ user.email }}</td>
+                                </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="margin-top:20px;"><span class="btn" id="submit">Begin Audit</span></div>
+        </div>
+        <div class="panel panel--loose panel--raised base-margin-bottom" style="width:25%; margin-left:70%; margin-top:-12%; position:fixed;">
+            <h3> Filters </h3>
+            <div>
+                <div class="row" style="margin-top:4%;">
+                    <div style="margin-left:25%">
+                        <input id="search" type="search" placeholder="Search Users..">
+                    </div>
+                </div>
+                <div class="row">
+                    <div style="margin-left:15%; margin-top:4%;">
+                        <label class="col-md-6">
+                            <input type="checkbox" id="internal_users" checked>
+                            <span class="checkbox__input">Internal Users</span>
+                        </label>
+                        <label class="col-md-6">
+                            <input type="checkbox" id="external_users" checked>
+                            <span class="checkbox__input">External Users</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

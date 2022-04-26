@@ -1,0 +1,58 @@
+<!-- This login page offers various input field to gather global information like API Keys, 
+    login name or password in advance of starting the demo.-->
+
+    {% extends "masterPage.html" %}
+
+    {% block content %}
+<div class="row" xmlns="http://www.w3.org/1999/html">
+            <!-- Left Rail -->
+            <div class="col-xl-3 col-md-3">
+            </div>
+    
+            <!-- Middle Rail -->
+            <div class="col-xl-6 col-md-6">
+                <div class="section" >
+                    <div class="panel panel--loose panel--raised base-margin-bottom">
+                        <div class="section">
+                            <form action="{{ url_for('login') }}" method="post">
+                                
+                                <!-- OPTIONAL: Replace with Customer Logo -->
+                                <div class="flex flex-center" style="margin-bottom:20px;">
+                                    <img id="customer-logo" src="{{ url_for('static',filename='IMAGES/Logo_green.png') }}"></img>
+    <!--                                    <img id="customer-logo" src="{{ url_for('static', filename='IMAGES/Republic_Services_logo.png')}}">-->
+                                </div>
+
+                                <!--OPTIONAL: Info alert e.g. about required preconfigurations-->
+                                <div class="alert alert--info">
+                                    <div class="alert__icon icon-info-outline"></div>
+                                    <div class="alert__message">
+                                        <!--CUSTOMIZE-->
+                                        <span style="color: #e2231a"> This dashboard is for </span> <span style="color: #e2231a">authorized personnel ONLY.</span> <span style="color: #e2231a">Unauthorized Users</span> <span style="color: #e2231a">PROHIBITED!!</span>
+                                        <!--CUSTOMIZE END-->
+                                    </div>
+                                </div>
+
+
+                                    <!-- Button area-->
+                                <div style="display:flex;align-items:center;justify-content:center;">
+                                    <input class="btn" type="submit" value="Login"> 
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                        <!--Alert for error message-->
+                            <!--PASS INFO: Pass the following information to the template: error=True/False ; errormessage="xxx" ; errorcode=xxx-->
+                            {% include "alert.html" %}
+    
+                    </div>
+                </div>
+            </div>
+    
+        <!-- Right Rail -->
+        <div class="col-xl-3 col-md-3">
+        </div>
+    </div>
+    {%  endblock %}
